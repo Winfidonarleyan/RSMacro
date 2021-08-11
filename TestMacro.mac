@@ -1,0 +1,186 @@
+import oralib, likepy, rsd, rslscr, globals;
+
+private macro GetClientCode(): Integer
+    var clientID = 0;
+    GetInt(clientID, "“ª ¦¨â¥ ª®¤ ª«¨¥­â ", 15);
+    return clientID;
+end;
+
+private macro GetClientCodeScroll() : Integer
+    var cmd = RsdCommand("select t_client, t_nameaccount, t_Account from daccount_dbt");
+    var ob = RsdRecordset(cmd, RSDVAL_CLIENT, RSDVAL_STATIC);
+
+    macro SMsgProc(ob, cmd, id, key)
+        if (cmd == DLG_KEY)
+            if (key == 13)
+                return CM_SELECT;
+            end;
+        end;
+    end;
+
+    if (RunScroll(ob, 0, null, "ChooseClientID", @SMsgProc, "‚ë¡®à ª«¨¥­â ", "", false, -1, -1, 60, 30))
+        return ob.value(0);
+    end;
+end;
+
+class ClientInfo(id: Integer)
+    private var name, fullName;
+    private var clientID = id;
+
+    private macro GetRSDParty()
+        var query = RsdRecordset(String("select t_shortname, t_name from dparty_dbt where t_partyid = ", clientID));
+
+        if (query.moveNext())
+            name = query.value(0);
+            fullName = query.value(1);
+        end;
+    end;
+
+    macro PrintNames()
+        GetRSDParty();
+        PrintLn("®«­®¥ ­ ¨¬¥­®¢ ­¨¥: ", fullName);
+        PrintLn("Šà âª®¥ ­ ¨¬¥­®¢ ­¨¥: ", name);
+    end;
+
+    macro PrintInn()
+        private var Inn = "-";
+        private var Kpp = "-";
+
+        SplitFullINN(GetPartyINN(clientID, 1), Inn, Kpp);
+        PrintLn("ˆ/Š: ", Inn, "/", Kpp);
+    end;
+
+    macro PrintOGRN()
+        var OGRN = "-";
+        var q = " SELECT t_code                                            "+
+                "   FROM dobjcode_dbt                                      "+
+                "  WHERE t_ObjectType = 3                                  "+
+                "       AND t_ObjectID = :PartyID                          "+
+                "       AND t_CodeKind = 27                                "+
+                "       AND t_BankCloseDate=to_date('01010001','ddmmyyyy') ";
+
+        var params = makeArray(SQLParam("PartyID", clientID));
+        var rs= execSQLselect(q, params, TRUE);
+
+        if( rs.moveNext() )
+            OGRN = Trim(rs.value("t_code"));
+        end;
+
+        PrintLn("ƒ: ", OGRN);
+    end;
+
+    macro PrintAdress()
+        var queryAdress = RsdRecordset(String("SELECT t.T_ADRESS, tp.T_NAME FROM DADRESS_DBT t, DADRTYPE_DBT tp WHERE T_PARTYID = ", clientID, " and TP.T_TYPE = T.T_TYPE"));
+
+        if (queryAdress.moveNext())
+            PrintLn(queryAdress.value(1), "  ¤à¥á: ", queryAdress.value(0))
+        end;
+    end;
+
+    macro PrintContact()
+        var queryPhone = RsdRecordset(String("SELECT t.T_VALUE, tp.T_NAME FROM DCONTACT_DBT t, DCONTACTTYPE_DBT tp WHERE T_PARTYID = ", clientID, " AND TP.T_TYPE = T.T_CONTACTTYPE"));
+
+        if (queryPhone.moveNext())
+            PrintLn(queryPhone.value(1), ": ", queryPhone.value(0))
+        end;
+    end;
+
+    macro PrintInfo()
+        PrintNames();
+        PrintInn();
+        PrintOGRN();
+        PrintAdress();
+        PrintContact();
+    end;
+end;
+
+class ClientInfoAccount(query)
+    var ID, AccountID, Chapter, AccountStatus, Money, CurrencyName, CurrencyCode: Integer;
+
+    private macro UpdateCurrencyByCode(code: Integer)
+        var queryCurrency = RsdRecordset(String("select t_short_name, t_externalcode from dcurrency_dbt where t_code_currency = ", code));
+
+        if (queryCurrency.moveNext())
+            CurrencyName = queryCurrency.value(0);
+            CurrencyCode = queryCurrency.value(1);
+        end;
+    end;
+
+    private macro GetAccountStatus(openCloseCode) : String
+        if (openCloseCode == "")
+            return "âªàëâ";
+        else
+            return "‡ ªàëâ";
+        end;
+    end;
+
+    private macro GetMoney() : Money
+        var moneyCount = $0;
+        var queryMoney = RsdRecordset(String("SELECT t_rest FROM drestdate_dbt WHERE t_accountid = ", AccountID));
+
+        if (queryMoney.moveNext())
+            moneyCount = queryMoney.value(0);
+        end;
+
+        return moneyCount;
+    end;
+
+    macro Update(updateQuery)
+        UpdateCurrencyByCode(updateQuery.value(1));
+
+        ID = updateQuery.value(0);
+        AccountStatus = GetAccountStatus(updateQuery.value(2));
+        Chapter = updateQuery.value(3);
+        AccountID = updateQuery.value(4);
+        Money = GetMoney();
+    end;
+end;
+
+private macro PrintHeaderTable()
+    var headTable = "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂ\n" +
+                    "³       ®¬¥à áçñâ       ³   ‚ «îâ  áç¥â    ³   ‘â âãá   ³   ’¥ªãé¨© ®áâ â®ª   ³\n" +
+                    "ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´";
+
+    PrintLn("\n‘ç¥â  ª«¨¥­â :");
+    PrintLn(headTable);
+end;
+
+private macro PrintLineTable(client: ClientInfoAccount)
+    [³  ####################  ³        ########  ³   ######   ³  ###########        ³] (client.ID, client.CurrencyName, client.AccountStatus, client.Money);
+    PrintLn("ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´");
+end;
+
+private macro PrintClientInfo(id: Integer)
+    var clientID = GetClientCode();*/
+    /*var clientID = GetClientCodeScroll();*/
+    var accCount = 1;
+
+    /*                                              0                1             2          3            4 */
+    var query = RsdRecordset(String("select t_Account, t_code_currency, t_open_close, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
+
+    if (query.moveNext())
+        PrintLn("ˆ­ä®à¬ æ¨ï ¯® ª«¨¥­âã á ª®¤®¬: ", clientID);
+
+        var accInfo = ClientInfoAccount(query);
+        var info = ClientInfo(clientID);
+
+        info.PrintInfo();
+
+        accInfo.Update(query);
+        PrintHeaderTable();
+        PrintLineTable(accInfo);
+
+        while (query.moveNext())
+            accInfo.Update(query);
+            PrintLineTable(accInfo);
+            accCount = accCount + 1;
+        end;
+
+        PrintLn("Š®«¨ç¥áâ¢® áç¥â®¢: ", accCount);
+    else
+        PrintLn("¥â ¨­ä®à¬ æ¨¨ ¯® ª«¨¥­âã á ª®¤®¬: ", clientID);
+    end;
+end;
+
+/* Init */
+PrintClientInfo();
