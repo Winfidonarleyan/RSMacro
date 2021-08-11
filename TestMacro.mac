@@ -190,13 +190,13 @@ class ClientInfoAccount()
   end;
 
   macro UpdateInfo(updateQuery)
-    UpdateCurrencyByCode(updateQuery.value(1));
+    UpdateCurrencyByCode(updateQuery.value("t_code_currency"));
 
-    ID = updateQuery.value(0);
-    AccountStatus = updateQuery.value(2);
-    Chapter = updateQuery.value(3);
-    AccountID = updateQuery.value(4);
-    Money = GetMoney(updateQuery.value(1));
+    ID = updateQuery.value("t_Account");
+    AccountStatus = updateQuery.value("status");
+    Chapter = updateQuery.value("t_chapter");
+    AccountID = updateQuery.value("t_accountid");
+    Money = GetMoney(updateQuery.value("t_code_currency"));
   end;
 
   macro PrintLineTable(isNeedPrintHeader)
