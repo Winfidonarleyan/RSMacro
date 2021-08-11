@@ -2,7 +2,7 @@ import oralib, likepy, rsd, rslscr, globals;
 
 private macro GetClientCode(): Integer
   var clientID = 0;
-  GetInt(clientID, "Укажите код клиента");
+  GetInt(clientID, "я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜");
   return clientID;
 end;
 
@@ -18,7 +18,7 @@ private macro GetClientCodeScroll() : Integer
     end;
   end;
 
-  if (RunScroll(ob, 0, null, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 60, 30))
+  if (RunScroll(ob, 0, null, "ChooseClientID", @SMsgProc, "я┐╜ыбоя┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜", "", false, -1, -1, 60, 30))
     return ob.value(0);
   end;
 end;
@@ -39,8 +39,8 @@ class ClientInfo(id: Integer)
   end;
 
   macro PrintNames()
-    PrintLn("Полное наименование: ", fullName);
-    PrintLn("Краткое наименование: ", name);
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜: ", fullName);
+    PrintLn("я┐╜я┐╜ткоя┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜: ", name);
   end;
 
   macro PrintInn()
@@ -54,11 +54,11 @@ class ClientInfo(id: Integer)
     SplitFullINN(GetPartyINN(clientID, 1), Inn, Kpp);
 
     if (Inn != "")
-      PrintLn("ИНН: ", Inn);
+      PrintLn("я┐╜я┐╜я┐╜: ", Inn);
     end;
 
     if (Kpp != "")
-      PrintLn("КПП: ", Kpp);
+      PrintLn("я┐╜я┐╜я┐╜: ", Kpp);
     end;
   end;
 
@@ -76,7 +76,7 @@ class ClientInfo(id: Integer)
 
     if (rs.moveNext())
       OGRN = Trim(rs.value("t_code"));
-      PrintLn("ОГРН: ", OGRN)
+      PrintLn("я┐╜я┐╜я┐╜я┐╜: ", OGRN)
     end;
   end;
 
@@ -84,7 +84,7 @@ class ClientInfo(id: Integer)
     var queryAdress = RsdRecordset(String("SELECT t.T_ADRESS, tp.T_NAME FROM DADRESS_DBT t, DADRTYPE_DBT tp WHERE T_PARTYID = ", clientID, " and TP.T_TYPE = T.T_TYPE"));
 
     if (queryAdress.moveNext())
-      PrintLn(queryAdress.value(1), " адрес: ", queryAdress.value(0));
+      PrintLn(queryAdress.value(1), " я┐╜я┐╜я┐╜я┐╜: ", queryAdress.value(0));
     end;
   end;
 
@@ -96,18 +96,29 @@ class ClientInfo(id: Integer)
     end;
   end;
 
+  macro PrintCodeList()
+    var queryCode = RsdRecordset(String("SELECT des.T_NAME, code.T_CODE FROM dobjkcode_dbt des, dobjcode_dbt code WHERE code.T_OBJECTID = ", clientID, " and code.T_CODEKIND = des.T_CODEKIND AND des.T_OBJECTTYPE = 3;"));
+
+    while (queryCode.moveNext())
+      PrintLn(queryCode.value(0), ": ", queryCode.value(1));
+    end;
+  end;
+
   macro PrintInfo()
     if (isExistClinet == false)
-      PrintLn("Нет информации по клиенту с кодом: ", clientID);
-      PrintLn("Такого клиента не существует, либо вы указали неверный код");
+      PrintLn("я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜рмации я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜: ", clientID);
+      PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜, я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜ укая┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜");
       return;
     end;
 
-    PrintLn("Информация по клиенту с кодом: ", clientID);
+    PrintLn("я┐╜я┐╜я┐╜рмая┐╜я┐╜ я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜: ", clientID);
 
     PrintNames();
-    PrintInn();
-    PrintOGRN();
+    PrintCodeList();
+    /* unused macros for code
+      PrintInn();
+      PrintOGRN();
+    */
     PrintAdress();
     PrintContact();
   end;
@@ -163,7 +174,7 @@ class ClientInfoAccount()
     rs = execSQLselect(select, params, FALSE);
 
     if (AccGetFreeAmount(accountFreeRest, NULL, ID, Chapter, code, {curdate}))
-      PrintLn("Ошибка при определении свободного остатка для счёта '", ID, "'");
+      PrintLn("я┐╜шибя┐╜я┐╜ я┐╜я┐╜ я┐╜я┐╜редя┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ своя┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜тка я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜ '", ID, "'");
     end;
 
     if (rs.moveNext())
@@ -190,15 +201,15 @@ class ClientInfoAccount()
 
   macro PrintLineTable(isNeedPrintHeader)
     if (isNeedPrintHeader)
-      var headTable = "┌────────────────────────┬──────────────────┬────────────┬─────────────────────┬\n" +
-                      "│       Номер счёта      │   Валюта счета   │   Статус   │   Текущий остаток   │";
+      var headTable = "я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜\n" +
+                      "я┐╜       я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜      я┐╜   я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜   я┐╜   я┐╜я┐╜я┐╜я┐╜я┐╜   я┐╜   я┐╜я┐╜я┐╜я┐╜щий я┐╜я┐╜я┐╜ток   я┐╜";
 
-      PrintLn("\nСчета клиента:");
+      PrintLn("\nя┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜:");
       PrintLn(headTable);
     end;
 
-    PrintLn("├────────────────────────┼──────────────────┼────────────┼─────────────────────┤");
-    [│  ####################  │        ########  │   ######   │  ###########        │]
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜─┤");
+    [я┐╜  ####################  я┐╜        ########  я┐╜   ######   я┐╜  ###########        я┐╜]
     (ID, CurrencyName, AccountStatus, Money);
   end;
 end;
@@ -211,7 +222,7 @@ end;
 
 private macro PrintAccountClientInfo(clientID: Integer)
   /*                                              0                1                                                                2          3            4 */
-  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'Открыт' else 'Закрыт' end, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
+  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'я┐╜я┐╜я┐╜я┐╜я┐╜' else 'я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜' end, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
 
   if (query.moveNext())
     var accCount = 1;
@@ -226,8 +237,8 @@ private macro PrintAccountClientInfo(clientID: Integer)
       accCount = accCount + 1;
     end;
 
-    PrintLn("└────────────────────────┴──────────────────┴────────────┴─────────────────────┘");
-    PrintLn("Количество счетов: ", accCount);
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜");
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜тво я┐╜я┐╜тов: ", accCount);
   end;
 end;
 
