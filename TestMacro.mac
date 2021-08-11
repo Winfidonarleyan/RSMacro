@@ -94,7 +94,7 @@ class ClientInfo(id: Integer)
   end;
 end;
 
-class ClientInfoAccount(query)
+class ClientInfoAccount()
   var ID, AccountID, Chapter, AccountStatus, Money, CurrencyName, CurrencyCode: Integer;
 
   private macro UpdateCurrencyByCode(code: Integer)
