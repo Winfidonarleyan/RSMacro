@@ -7,20 +7,35 @@ private macro GetClientCode(): Integer
 end;
 
 private macro GetClientCodeScroll() : Integer
-  var cmd = RsdCommand("select t_client, t_nameaccount, t_Account from daccount_dbt");
+  var ColNames : TArray = TArray;
+  var cmd = RsdCommand("select t_client, t_nameaccount from daccount_dbt");
   var ob = RsdRecordset(cmd, RSDVAL_CLIENT, RSDVAL_STATIC);
 
-  macro SMsgProc(ob, cmd, id, key)
-    if (cmd == DLG_KEY)
-      if (key == 13)
-        return CM_SELECT;
-      end;
+  private macro SMsgProc(ob, cmd, id, key)
+    if ((cmd == DLG_KEY) AND (key == 13))
+      return CM_SELECT;
     end;
+
+    return CM_DEFAULT;
   end;
 
-  if (RunScroll(ob, 0, null, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 60, 30))
+  private macro AddCol(ar, ind, fld, head, width)
+    ar.value(ind * 6 + 0) = fld;
+    ar.value(ind * 6 + 1) = head;
+    ar.value(ind * 6 + 2) = width;
+    ar.value(ind * 6 + 3) = 2; // fldType
+    ar.value(ind * 6 + 4) = -1; // decPoint
+    ar.value(ind * 6 + 5) = 0; // reserv
+  end;
+
+  AddCol(ColNames, 0, "t_client", "Номер клиента", null);
+  AddCol(ColNames, 1, "t_nameaccount", "Имя клиента", null);
+
+  if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 70, 30))
     return ob.value(0);
   end;
+
+  return 0;
 end;
 
 class ClientInfo(id: Integer)
@@ -31,7 +46,7 @@ class ClientInfo(id: Integer)
   private macro GetRSDParty()
     var query = RsdRecordset(String("select t_shortname, t_name from dparty_dbt where t_partyid = ", clientID));
 
-    if (query.moveNext())
+     if (query.moveNext())
       name = query.value(0);
       fullName = query.value(1);
       isExistClinet = true;
@@ -217,13 +232,13 @@ class ClientInfoAccount()
   end;
 end;
 
-private macro PrintBaseClientInfo(clientID: Integer)
+private macro PrintBaseClientInfo(clientID)
   var info = ClientInfo(clientID);
 
   info.PrintInfo();
 end;
 
-private macro PrintAccountClientInfo(clientID: Integer)
+private macro PrintAccountClientInfo(clientID)
   /*                                              0                1                                                                          2          3            4 */
   var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'Открыт' else 'Закрыт' end as status, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
 
@@ -246,8 +261,8 @@ private macro PrintAccountClientInfo(clientID: Integer)
 end;
 
 private macro PrintAllClientInfo()
-  var clientID = GetClientCode();
-  /*var clientID = GetClientCodeScroll();*/
+  //var clientID = GetClientCode();
+  var clientID = GetClientCodeScroll();
 
   PrintBaseClientInfo(clientID);
   PrintAccountClientInfo(clientID);
