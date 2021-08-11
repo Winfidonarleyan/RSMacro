@@ -160,7 +160,7 @@ class ClientInfoAccount()
 
     PrintLn("������������������������������������������������������������������������������Ĵ");
     [�  ####################  �        ########  �   ######   �  ###########        �]
-    (client.ID, client.CurrencyName, client.AccountStatus, client.Money);
+    (ID, CurrencyName, AccountStatus, Money);
   end;
 end;
 
