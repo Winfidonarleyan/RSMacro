@@ -29,7 +29,7 @@ private macro GetClientCodeScroll() : Integer
   end;
 
   AddCol(ColNames, 0, "t_client", "Номер клиента", null);
-  AddCol(ColNames, 1, "t_nameaccount", "Имя клиента", null);
+  AddCol(ColNames, 1, "t_nameaccount", "Наименование клиента", null);
 
   if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 70, 30))
     return ob.value(0);
