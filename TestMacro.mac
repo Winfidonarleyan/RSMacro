@@ -128,14 +128,6 @@ class ClientInfoAccount()
     end;
   end;
 
-  private macro GetAccountStatus(openCloseCode) : String
-    if (openCloseCode == "")
-        return "Открыт";
-    else
-        return "Закрыт";
-    end;
-  end;
-
   private macro GetMoney() : Money
     var moneyCount = $0;
     var queryMoney = RsdRecordset(String("SELECT t_rest FROM drestdate_dbt WHERE t_accountid = ", AccountID));
@@ -151,7 +143,7 @@ class ClientInfoAccount()
     UpdateCurrencyByCode(updateQuery.value(1));
 
     ID = updateQuery.value(0);
-    AccountStatus = GetAccountStatus(updateQuery.value(2));
+    AccountStatus = updateQuery.value(2);
     Chapter = updateQuery.value(3);
     AccountID = updateQuery.value(4);
     Money = GetMoney();
@@ -180,7 +172,7 @@ end;
 
 private macro PrintAccountClientInfo(clientID: Integer)
   /*                                              0                1             2          3            4 */
-  var query = RsdRecordset(String("select t_Account, t_code_currency, t_open_close, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
+  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'Открыт' else 'Закрыт' end, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
 
   if (query.moveNext())
     var accCount = 1;
