@@ -188,7 +188,7 @@ class ClientInfoAccount()
     Money = GetMoney(updateQuery.value(1));
   end;
 
-  macro PrintLineTable(client: ClientInfoAccount, isNeedPrintHeader)
+  macro PrintLineTable(isNeedPrintHeader)
     if (isNeedPrintHeader)
       var headTable = "��������������������������������������������������������������������������������\n" +
                       "�       ����� ����      �   ����� ���   �   �����   �   ����騩 ���⮪   �";
@@ -218,11 +218,11 @@ private macro PrintAccountClientInfo(clientID: Integer)
     var accInfo = ClientInfoAccount();
 
     accInfo.Update(query);
-    accInfo.PrintLineTable(accInfo, true);
+    accInfo.PrintLineTable(true);
 
     while (query.moveNext())
       accInfo.Update(query);
-      accInfo.PrintLineTable(accInfo);
+      accInfo.PrintLineTable();
       accCount = accCount + 1;
     end;
 
