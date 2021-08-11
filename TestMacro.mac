@@ -128,12 +128,51 @@ class ClientInfoAccount()
     end;
   end;
 
-  private macro GetMoney() : Money
+  private macro GetMoney(code: Integer) : Money
     var moneyCount = $0;
-    var queryMoney = RsdRecordset(String("SELECT t_rest FROM drestdate_dbt WHERE t_accountid = ", AccountID));
+    var accountFreeRest = $0;
+    var params:TArray;
+    var rs:object;
 
-    if (queryMoney.moveNext())
-      moneyCount = queryMoney.value(0);
+    var select = "select nvl(sum(ch.t_Uselimit - ch.t_ReconstructionLimit), 0) "
+                 "from dcredit_c_dbt cred, dovc_sfc_dbt ovc, dchlimit_dbt ch "
+                 "where cred.t_creditnumber = ovc.t_creditnumber_ref "
+                 "and cred.t_regdate <= :date1 "
+                 "and cred.t_ReturnDate >= :date2 "
+                 "and ch.t_CreditNumber_Ref = cred.t_CreditNumber "
+                 "and ch.t_IsProcessing = chr(0) "
+                 "and ch.t_Date = :date3 "
+                 "and ch.t_IsReject = chr(0) "
+                 "and ovc.t_id = ( select sf.t_ID "
+                 "from dsfcontr_dbt sf "
+                 "where sf.t_ServKind = 3 "
+                 "and sf.t_ObjectType = 1 "
+                 "and sf.t_FIID = :fiid "
+                 "and sf.t_Object = :acc "
+                 "and t_DateBegin <= :date4 "
+                 "and (t_DateClose >= :date5 OR t_DateClose = to_date('01010001','ddmmyyyy')))";
+
+    params = makeArray(SQLParam("date1", {curdate}),
+                       SQLParam("date2", {curdate}),
+                       SQLParam("date3", {curdate}),
+                       SQLParam("fiid",  code),
+                       SQLParam("acc",   ID),
+                       SQLParam("date4", {curdate}),
+                       SQLParam("date5", {curdate}));
+
+    rs = execSQLselect(select, params, FALSE);
+
+    if (AccGetFreeAmount(accountFreeRest, NULL, ID, Chapter, code, {curdate}))
+      PrintLn("�訡�� �� ��।������ ᢮������� ���⪠ ��� ���� '", ID, "'");
+    end;
+
+    if (rs.moveNext())
+      moneyCount = AccountFreeRest + rs.value(0);
+
+      /* Debug acc money
+        PrintLn("> AccountFreeRest = ", AccountFreeRest);
+        PrintLn("> rs.value(0) = ", rs.value(0));
+      */
     end;
 
     return moneyCount;
@@ -146,7 +185,7 @@ class ClientInfoAccount()
     AccountStatus = updateQuery.value(2);
     Chapter = updateQuery.value(3);
     AccountID = updateQuery.value(4);
-    Money = GetMoney();
+    Money = GetMoney(updateQuery.value(1));
   end;
 
   macro PrintLineTable(client: ClientInfoAccount, isNeedPrintHeader)
