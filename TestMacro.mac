@@ -73,7 +73,7 @@ class ClientInfo(id: Integer)
         var queryAdress = RsdRecordset(String("SELECT t.T_ADRESS, tp.T_NAME FROM DADRESS_DBT t, DADRTYPE_DBT tp WHERE T_PARTYID = ", clientID, " and TP.T_TYPE = T.T_TYPE"));
 
         if (queryAdress.moveNext())
-            PrintLn(queryAdress.value(1), " адрес: ", queryAdress.value(0))
+            PrintLn(queryAdress.value(1), " адрес: ", queryAdress.value(0));
         end;
     end;
 
@@ -81,7 +81,7 @@ class ClientInfo(id: Integer)
         var queryPhone = RsdRecordset(String("SELECT t.T_VALUE, tp.T_NAME FROM DCONTACT_DBT t, DCONTACTTYPE_DBT tp WHERE T_PARTYID = ", clientID, " AND TP.T_TYPE = T.T_CONTACTTYPE"));
 
         if (queryPhone.moveNext())
-            PrintLn(queryPhone.value(1), ": ", queryPhone.value(0))
+            PrintLn(queryPhone.value(1), ": ", queryPhone.value(0));
         end;
     end;
 
@@ -151,7 +151,7 @@ private macro PrintLineTable(client: ClientInfoAccount)
 end;
 
 private macro PrintClientInfo(id: Integer)
-    var clientID = GetClientCode();*/
+    var clientID = GetClientCode();
     /*var clientID = GetClientCodeScroll();*/
     var accCount = 1;
 
