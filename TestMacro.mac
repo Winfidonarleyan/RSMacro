@@ -58,43 +58,6 @@ class ClientInfo(id: Integer)
     PrintLn("��⪮� ������������: ", name);
   end;
 
-  macro PrintInn()
-    if (isExistClinet == false)
-      return;
-    end;
-
-    private var Inn = "-";
-    private var Kpp = "-";
-
-    SplitFullINN(GetPartyINN(clientID, 1), Inn, Kpp);
-
-    if (Inn != "")
-      PrintLn("���: ", Inn);
-    end;
-
-    if (Kpp != "")
-      PrintLn("���: ", Kpp);
-    end;
-  end;
-
-  macro PrintOGRN()
-    var OGRN = "-";
-    var q = " SELECT t_code                                            "+
-            "   FROM dobjcode_dbt                                      "+
-            "  WHERE t_ObjectType = 3                                  "+
-            "       AND t_ObjectID = :PartyID                          "+
-            "       AND t_CodeKind = 27                                "+
-            "       AND t_BankCloseDate=to_date('01010001','ddmmyyyy') ";
-
-    var params = makeArray(SQLParam("PartyID", clientID));
-    var rs = execSQLselect(q, params, TRUE);
-
-    if (rs.moveNext())
-      OGRN = Trim(rs.value("t_code"));
-      PrintLn("����: ", OGRN)
-    end;
-  end;
-
   macro PrintAdress()
     var queryAdress = RsdRecordset(String("SELECT t.T_ADRESS as addr, tp.T_NAME as type FROM DADRESS_DBT t, DADRTYPE_DBT tp WHERE T_PARTYID = ", clientID, " and TP.T_TYPE = T.T_TYPE"));
 
@@ -130,10 +93,6 @@ class ClientInfo(id: Integer)
 
     PrintNames();
     PrintCodeList();
-    /* unused macros for code
-      PrintInn();
-      PrintOGRN();
-    */
     PrintAdress();
     PrintContact();
   end;
