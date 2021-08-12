@@ -1,15 +1,7 @@
 import oralib, likepy, rsd, rslscr, globals;
 
-private macro GetClientCode(): Integer
-  var clientID = 0;
-  GetInt(clientID, "Ğ£ĞºĞ°Ğ¶Ğ¸Ñ‚Ğµ ĞºĞ¾Ğ´ ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ğ°");
-  return clientID;
-end;
-
-private macro GetClientCodeScroll() : Integer
-  var ColNames : TArray = TArray;
-  var cmd = RsdCommand("select t_client, t_nameaccount from daccount_dbt");
-  var ob = RsdRecordset(cmd, RSDVAL_CLIENT, RSDVAL_STATIC);
+private macro GetClientCode() : Integer
+  record Panel(ACC, "test.lbr") dialog;
 
   private macro SMsgProc(ob, cmd, id, key)
     if ((cmd == DLG_KEY) AND (key == 13))
@@ -28,14 +20,30 @@ private macro GetClientCodeScroll() : Integer
     ar.value(ind * 6 + 5) = 0; // reserv
   end;
 
-  AddCol(ColNames, 0, "t_client", "ĞĞ¾Ğ¼ĞµÑ€ ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ğ°", null);
-  AddCol(ColNames, 1, "t_nameaccount", "ĞĞ°Ğ¸Ğ¼ĞµĞ½Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ğ°", null);
+  macro MsgProc(dlg, cmd, id, key)
+    if ((CMD == DLG_KEY) AND (key == 317))
+      var ColNames : TArray = TArray;
+      var rsCmd = RsdCommand("select t_client, t_nameaccount from daccount_dbt");
+      var ob = RsdRecordset(rsCmd, RSDVAL_CLIENT, RSDVAL_STATIC);
 
-  if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "Ğ’Ñ‹Ğ±Ğ¾Ñ€ ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ğ°", "", false, -1, -1, 70, 30))
-    return ob.value("t_client");
+      AddCol(ColNames, 0, "t_client", "®¬¥à ª«¨¥­â ", null);
+      AddCol(ColNames, 1, "t_nameaccount", " ¨¬¥­®¢ ­¨¥ ª«¨¥­â ", null);
+
+      if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "‚ë¡®à ª«¨¥­â ", "", false, -1, -1, 70, 30))
+        dlg.ClientID = ob.value("t_client");
+      else
+        dlg.ClientID = 0;
+      end;
+    end;
   end;
 
-  return 0;
+  var clientCode = 0;
+
+  if (RunDialog(Panel, @MsgProc))
+    clientCode = Panel.ClientID;
+  end;
+
+  return clientCode;
 end;
 
 class ClientInfo(id: Integer)
@@ -54,15 +62,15 @@ class ClientInfo(id: Integer)
   end;
 
   macro PrintNames()
-    PrintLn("ĞŸĞ¾Ğ»Ğ½Ğ¾Ğµ Ğ½Ğ°Ğ¸Ğ¼ĞµĞ½Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ: ", fullName);
-    PrintLn("ĞšÑ€Ğ°Ñ‚ĞºĞ¾Ğµ Ğ½Ğ°Ğ¸Ğ¼ĞµĞ½Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ: ", name);
+    PrintLn("®«­®¥ ­ ¨¬¥­®¢ ­¨¥: ", fullName);
+    PrintLn("Šà âª®¥ ­ ¨¬¥­®¢ ­¨¥: ", name);
   end;
 
   macro PrintAdress()
     var queryAdress = RsdRecordset(String("SELECT t.T_ADRESS as addr, tp.T_NAME as type FROM DADRESS_DBT t, DADRTYPE_DBT tp WHERE T_PARTYID = ", clientID, " and TP.T_TYPE = T.T_TYPE"));
 
     if (queryAdress.moveNext())
-      PrintLn(queryAdress.value("type"), " Ğ°Ğ´Ñ€ĞµÑ: ", queryAdress.value("addr"), ".");
+      PrintLn(queryAdress.value("type"), "  ¤à¥á: ", queryAdress.value("addr"), ".");
     end;
   end;
 
@@ -84,12 +92,12 @@ class ClientInfo(id: Integer)
 
   macro PrintInfo()
     if (isExistClinet == false)
-      PrintLn("ĞĞµÑ‚ Ğ¸Ğ½Ñ„Ğ¾Ñ€Ğ¼Ğ°Ñ†Ğ¸Ğ¸ Ğ¿Ğ¾ ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ñƒ Ñ ĞºĞ¾Ğ´Ğ¾Ğ¼: ", clientID);
-      PrintLn("Ğ¢Ğ°ĞºĞ¾Ğ³Ğ¾ ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ğ° Ğ½Ğµ ÑÑƒÑ‰ĞµÑÑ‚Ğ²ÑƒĞµÑ‚, Ğ»Ğ¸Ğ±Ğ¾ Ğ²Ñ‹ ÑƒĞºĞ°Ğ·Ğ°Ğ»Ğ¸ Ğ½ĞµĞ²ĞµÑ€Ğ½Ñ‹Ğ¹ ĞºĞ¾Ğ´");
+      PrintLn("¥â ¨­ä®à¬ æ¨¨ ¯® ª«¨¥­âã á ª®¤®¬: ", clientID);
+      PrintLn("’ ª®£® ª«¨¥­â  ­¥ áãé¥áâ¢ã¥â, «¨¡® ¢ë ãª § «¨ ­¥¢¥à­ë© ª®¤");
       return;
     end;
 
-    PrintLn("Ğ˜Ğ½Ñ„Ğ¾Ñ€Ğ¼Ğ°Ñ†Ğ¸Ñ Ğ¿Ğ¾ ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ñƒ Ñ ĞºĞ¾Ğ´Ğ¾Ğ¼: ", clientID);
+    PrintLn("ˆ­ä®à¬ æ¨ï ¯® ª«¨¥­âã á ª®¤®¬: ", clientID);
 
     PrintNames();
     PrintCodeList();
@@ -149,7 +157,7 @@ class ClientInfoAccount()
     rs = execSQLselect(select, params, FALSE);
 
     if (AccGetFreeAmount(accountFreeRest, NULL, ID, Chapter, code, {curdate}))
-      PrintLn("ĞÑˆĞ¸Ğ±ĞºĞ° Ğ¿Ñ€Ğ¸ Ğ¾Ğ¿Ñ€ĞµĞ´ĞµĞ»ĞµĞ½Ğ¸Ğ¸ ÑĞ²Ğ¾Ğ±Ğ¾Ğ´Ğ½Ğ¾Ğ³Ğ¾ Ğ¾ÑÑ‚Ğ°Ñ‚ĞºĞ° Ğ´Ğ»Ñ ÑÑ‡Ñ‘Ñ‚Ğ° '", ID, "'");
+      PrintLn("è¨¡ª  ¯à¨ ®¯à¥¤¥«¥­¨¨ á¢®¡®¤­®£® ®áâ âª  ¤«ï áçñâ  '", ID, "'");
     end;
 
     if (rs.moveNext())
@@ -176,17 +184,17 @@ class ClientInfoAccount()
 
   macro PrintLineTable(isNeedPrintHeader)
     if (isNeedPrintHeader)
-      var headTable = "â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬\n" +
-                      "â”‚                        â”‚      Ğ’Ğ°Ğ»ÑÑ‚Ğ° ÑÑ‡ĞµÑ‚Ğ°      â”‚            â”‚                     â”‚\n" +
-                      "â”‚      ĞĞ¾Ğ¼ĞµÑ€ ÑÑ‡Ñ‘Ñ‚Ğ°       â”œâ”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤   Ğ¡Ñ‚Ğ°Ñ‚ÑƒÑ   â”‚   Ğ¢ĞµĞºÑƒÑ‰Ğ¸Ğ¹ Ğ¾ÑÑ‚Ğ°Ñ‚Ğ¾Ğº   â”‚\n" +
-                      "â”‚                        â”‚  ĞšĞ¾Ğ´  â”‚  ĞĞ°Ğ¸Ğ¼ĞµĞ½Ğ¾Ğ²Ğ°Ğ½Ğ¸Ğµ  â”‚            â”‚                     â”‚";
+      var headTable = "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂ\n" +
+                      "³                        ³      ‚ «îâ  áç¥â       ³            ³                     ³\n" +
+                      "³      ®¬¥à áçñâ        ÃÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´   ‘â âãá   ³   ’¥ªãé¨© ®áâ â®ª   ³\n" +
+                      "³                        ³  Š®¤  ³   ¨¬¥­®¢ ­¨¥  ³            ³                     ³";
 
-      PrintLn("\nĞ¡Ñ‡ĞµÑ‚Ğ° ĞºĞ»Ğ¸ĞµĞ½Ñ‚Ğ°:");
+      PrintLn("\n‘ç¥â  ª«¨¥­â :");
       PrintLn(headTable);
     end;
 
-    PrintLn("â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤");
-    [â”‚  ####################  â”‚  #### â”‚  ############  â”‚   #######  â”‚  ###########        â”‚]
+    PrintLn("ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´");
+    [³  ####################  ³  #### ³  ############  ³   #######  ³  ###########        ³]
     (ID, CurrencyShortName, CurrencyName, AccountStatus, Money);
   end;
 end;
@@ -199,7 +207,7 @@ end;
 
 private macro PrintAccountClientInfo(clientID)
   /*                                              0                1                                                                          2          3            4 */
-  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'ĞÑ‚ĞºÑ€Ñ‹Ñ‚' else 'Ğ—Ğ°ĞºÑ€Ñ‹Ñ‚' end as status, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
+  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'âªàëâ' else '‡ ªàëâ' end as status, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
 
   if (query.moveNext())
     var accCount = 1;
@@ -214,14 +222,13 @@ private macro PrintAccountClientInfo(clientID)
       accCount = accCount + 1;
     end;
 
-    PrintLn("â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜");
-    PrintLn("ĞšĞ¾Ğ»Ğ¸Ñ‡ĞµÑÑ‚Ğ²Ğ¾ ÑÑ‡ĞµÑ‚Ğ¾Ğ²: ", accCount);
+    PrintLn("ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ");
+    PrintLn("Š®«¨ç¥áâ¢® áç¥â®¢: ", accCount);
   end;
 end;
 
 private macro PrintAllClientInfo()
   var clientID = GetClientCode();
-  //var clientID = GetClientCodeScroll();
 
   PrintBaseClientInfo(clientID);
   PrintAccountClientInfo(clientID);
