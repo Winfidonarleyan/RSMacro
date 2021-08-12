@@ -2,7 +2,7 @@ import oralib, likepy, rsd, rslscr, globals;
 
 private macro GetClientCode(): Integer
   var clientID = 0;
-  GetInt(clientID, "������ ��� ������");
+  GetInt(clientID, "Укажите код клиента");
   return clientID;
 end;
 
@@ -28,10 +28,10 @@ private macro GetClientCodeScroll() : Integer
     ar.value(ind * 6 + 5) = 0; // reserv
   end;
 
-  AddCol(ColNames, 0, "t_client", "����� ������", null);
-  AddCol(ColNames, 1, "t_nameaccount", "������������ ������", null);
+  AddCol(ColNames, 0, "t_client", "Номер клиента", null);
+  AddCol(ColNames, 1, "t_nameaccount", "Наименование клиента", null);
 
-  if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "�롮� ������", "", false, -1, -1, 70, 30))
+  if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 70, 30))
     return ob.value("t_client");
   end;
 
@@ -54,15 +54,15 @@ class ClientInfo(id: Integer)
   end;
 
   macro PrintNames()
-    PrintLn("������ ������������: ", fullName);
-    PrintLn("��⪮� ������������: ", name);
+    PrintLn("Полное наименование: ", fullName);
+    PrintLn("Краткое наименование: ", name);
   end;
 
   macro PrintAdress()
     var queryAdress = RsdRecordset(String("SELECT t.T_ADRESS as addr, tp.T_NAME as type FROM DADRESS_DBT t, DADRTYPE_DBT tp WHERE T_PARTYID = ", clientID, " and TP.T_TYPE = T.T_TYPE"));
 
     if (queryAdress.moveNext())
-      PrintLn(queryAdress.value("type"), " ����: ", queryAdress.value("addr"), ".");
+      PrintLn(queryAdress.value("type"), " адрес: ", queryAdress.value("addr"), ".");
     end;
   end;
 
@@ -84,12 +84,12 @@ class ClientInfo(id: Integer)
 
   macro PrintInfo()
     if (isExistClinet == false)
-      PrintLn("��� ���ଠ樨 �� ������� � �����: ", clientID);
-      PrintLn("������ ������ �� �������, ���� �� 㪠���� ������ ���");
+      PrintLn("Нет информации по клиенту с кодом: ", clientID);
+      PrintLn("Такого клиента не существует, либо вы указали неверный код");
       return;
     end;
 
-    PrintLn("���ଠ�� �� ������� � �����: ", clientID);
+    PrintLn("Информация по клиенту с кодом: ", clientID);
 
     PrintNames();
     PrintCodeList();
@@ -149,7 +149,7 @@ class ClientInfoAccount()
     rs = execSQLselect(select, params, FALSE);
 
     if (AccGetFreeAmount(accountFreeRest, NULL, ID, Chapter, code, {curdate}))
-      PrintLn("�訡�� �� ��।������ ᢮������� ���⪠ ��� ���� '", ID, "'");
+      PrintLn("Ошибка при определении свободного остатка для счёта '", ID, "'");
     end;
 
     if (rs.moveNext())
@@ -176,17 +176,17 @@ class ClientInfoAccount()
 
   macro PrintLineTable(isNeedPrintHeader)
     if (isNeedPrintHeader)
-      var headTable = "��������������������������������������������������������������������������������������\n" +
-                      "�                        �      ����� ���      �            �                     �\n" +
-                      "�      ����� ����       ������������������������Ĵ   �����   �   ����騩 ���⮪   �\n" +
-                      "�                        �  ���  �  ������������  �            �                     �";
+      var headTable = "┌────────────────────────┬────────────────────────┬────────────┬─────────────────────┬\n" +
+                      "│                        │      Валюта счета      │            │                     │\n" +
+                      "│      Номер счёта       ├───────┬────────────────┤   Статус   │   Текущий остаток   │\n" +
+                      "│                        │  Код  │  Наименование  │            │                     │";
 
-      PrintLn("\n��� ������:");
+      PrintLn("\nСчета клиента:");
       PrintLn(headTable);
     end;
 
-    PrintLn("������������������������������������������������������������������������������������Ĵ");
-    [�  ####################  �  #### �  ############  �   #######  �  ###########        �]
+    PrintLn("├────────────────────────┼───────┼────────────────┼────────────┼─────────────────────┤");
+    [│  ####################  │  #### │  ############  │   #######  │  ###########        │]
     (ID, CurrencyShortName, CurrencyName, AccountStatus, Money);
   end;
 end;
@@ -199,7 +199,7 @@ end;
 
 private macro PrintAccountClientInfo(clientID)
   /*                                              0                1                                                                          2          3            4 */
-  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN '�����' else '������' end as status, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
+  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'Открыт' else 'Закрыт' end as status, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
 
   if (query.moveNext())
     var accCount = 1;
@@ -214,14 +214,14 @@ private macro PrintAccountClientInfo(clientID)
       accCount = accCount + 1;
     end;
 
-    PrintLn("��������������������������������������������������������������������������������������");
-    PrintLn("������⢮ ��⮢: ", accCount);
+    PrintLn("└────────────────────────┴───────┴────────────────┴────────────┴─────────────────────┘");
+    PrintLn("Количество счетов: ", accCount);
   end;
 end;
 
 private macro PrintAllClientInfo()
-  //var clientID = GetClientCode();
-  var clientID = GetClientCodeScroll();
+  var clientID = GetClientCode();
+  //var clientID = GetClientCodeScroll();
 
   PrintBaseClientInfo(clientID);
   PrintAccountClientInfo(clientID);
