@@ -141,7 +141,7 @@ class ClientInfoAccount()
     var accountFreeRest = $0;
     var accountFreeRestLimit = $0;
 
-    if (AccGetFreeAmount(accountFreeRest, NULL, ID, Chapter, code, {curdate}))
+    if (AccGetFreeAmount(accountFreeRest, accountFreeRestLimit, ID, Chapter, code, {curdate}))
       PrintLn("Ошибка при определении свободного остатка для счёта '", ID, "'");
     end;
 
