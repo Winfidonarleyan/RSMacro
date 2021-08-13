@@ -23,14 +23,14 @@ private macro GetClientCode() : Integer
   macro MsgProc(dlg, cmd, id, key)
     if ((CMD == DLG_KEY) AND (key == 317))
       var ColNames : TArray = TArray;
-      var rsCmd = RsdCommand("select t_client, t_nameaccount from daccount_dbt");
+      var rsCmd = RsdCommand("select t_partyid, t_shortname from dparty_dbt");
       var ob = RsdRecordset(rsCmd, RSDVAL_CLIENT, RSDVAL_STATIC);
 
-      AddCol(ColNames, 0, "t_client", "Номер клиента", null);
-      AddCol(ColNames, 1, "t_nameaccount", "Наименование клиента", null);
+      AddCol(ColNames, 0, "t_partyid", "Номер клиента", null);
+      AddCol(ColNames, 1, "t_shortname", "Наименование клиента", null);
 
       if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 70, 30))
-        dlg.ClientID = ob.value("t_client");
+        dlg.ClientID = ob.value("t_partyid");
       else
         dlg.ClientID = 0;
       end;
