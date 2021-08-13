@@ -1,10 +1,10 @@
-import oralib, likepy, rsd, rslscr, globals;
+import rsd, globals;
 
 private macro GetClientCode() : Integer
   record Panel(ACC, "test.lbr") dialog;
 
   private macro SMsgProc(ob, cmd, id, key)
-    if ((cmd == DLG_KEY) AND (key == 13))
+    if ((cmd == DLG_KEY) AND (key == 13)) // Enter
       return CM_SELECT;
     end;
 
@@ -21,7 +21,7 @@ private macro GetClientCode() : Integer
   end;
 
   macro MsgProc(dlg, cmd, id, key)
-    if ((CMD == DLG_KEY) AND (key == 317))
+    if ((CMD == DLG_KEY) AND (key == 317)) // F3
       var ColNames : TArray = TArray;
       var rsCmd = RsdCommand("select t_partyid, t_shortname from dparty_dbt");
       var ob = RsdRecordset(rsCmd, RSDVAL_CLIENT, RSDVAL_STATIC);
@@ -29,7 +29,7 @@ private macro GetClientCode() : Integer
       AddCol(ColNames, 0, "t_partyid", "Номер клиента", null);
       AddCol(ColNames, 1, "t_shortname", "Наименование клиента", null);
 
-      if (ob.moveNext() AND RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 70, 30))
+      if (RunScroll(ob, 2, ColNames, "ChooseClientID", @SMsgProc, "Выбор клиента", "", false, -1, -1, 70, 30))
         dlg.ClientID = ob.value("t_partyid");
       else
         dlg.ClientID = 0;
@@ -37,13 +37,11 @@ private macro GetClientCode() : Integer
     end;
   end;
 
-  var clientCode = 0;
-
   if (RunDialog(Panel, @MsgProc))
-    clientCode = Panel.ClientID;
+    return Panel.ClientID;
   end;
 
-  return clientCode;
+  return 0;
 end;
 
 class ClientInfo(id: Integer)
@@ -177,9 +175,7 @@ class ClientInfoAccount()
 end;
 
 private macro PrintBaseClientInfo(clientID)
-  var info = ClientInfo(clientID);
-
-  info.PrintInfo();
+  ClientInfo(clientID).PrintInfo();
 end;
 
 private macro PrintAccountClientInfo(clientID)
