@@ -83,8 +83,6 @@ class ClientInfo(id: Integer)
       var adrType = queryContact.value("type");
       var adrValue = queryContact.value("value");
 
-      var fullAddress : String = adrName;
-
       Print(adrName);
 
       if (adrType)
