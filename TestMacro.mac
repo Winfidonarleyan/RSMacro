@@ -26,10 +26,10 @@ private macro GetClientCode() : Integer
       var rsCmd = RsdCommand("select t_partyid, t_shortname from dparty_dbt");
       var ob = RsdRecordset(rsCmd, RSDVAL_CLIENT, RSDVAL_STATIC);
 
-      AddCol(ColNames, 0, "t_partyid", "Номер клиента");
-      AddCol(ColNames, 1, "t_shortname", "Наименование клиента");
+      AddCol(ColNames, 0, "t_partyid", "я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜");
+      AddCol(ColNames, 1, "t_shortname", "я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜");
 
-      if (RunScroll(ob, 0, ColNames, "ChooseClientID", @SMsgProc, "Выбор клиента", "", true, -1, -1, 70, 30))
+      if (RunScroll(ob, 0, ColNames, "ChooseClientID", @SMsgProc, "я┐╜ыбоя┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜", "", true, -1, -1, 70, 30))
         dlg.ClientID = ob.value("t_partyid");
       else
         dlg.ClientID = 0;
@@ -44,7 +44,7 @@ private macro GetClientCode() : Integer
   return 0;
 end;
 
-class ClientInfo(id: Integer)
+private class ClientInfo(id: Integer)
   private var name, fullName;
   private var isExistClinet = false;
   private var clientID = id;
@@ -59,20 +59,20 @@ class ClientInfo(id: Integer)
     end;
   end;
 
-  macro PrintNames()
-    PrintLn("Полное наименование: ", fullName);
-    PrintLn("Краткое наименование: ", name);
+  private macro PrintNames()
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜: ", fullName);
+    PrintLn("я┐╜я┐╜ткоя┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜: ", name);
   end;
 
-  macro PrintAdress()
+  private macro PrintAdress()
     var queryAdress = RsdRecordset(String("SELECT t.T_ADRESS as addr, tp.T_NAME as type FROM DADRESS_DBT t, DADRTYPE_DBT tp WHERE T_PARTYID = ", clientID, " and TP.T_TYPE = T.T_TYPE"));
 
     while (queryAdress.moveNext())
-      PrintLn(queryAdress.value("type"), " адрес: ", queryAdress.value("addr"), ".");
+      PrintLn(queryAdress.value("type"), " я┐╜я┐╜я┐╜я┐╜: ", queryAdress.value("addr"), ".");
     end;
   end;
 
-  macro PrintContact()
+  private macro PrintContact()
     var strVariables = "t1.T_NAME as name, t2.T_NAME as type, t.T_VALUE as value";
     var strFrom = "DCONTACT_DBT t LEFT JOIN DCONTACTKIND_DBT t1 ON t1.T_KIND = t.T_CONTACTKIND LEFT JOIN DCONTACTTYPE_DBT t2 ON t.T_CONTACTTYPE = t2.T_TYPE";
 
@@ -93,7 +93,7 @@ class ClientInfo(id: Integer)
     end;
   end;
 
-  macro PrintCodeList()
+  private macro PrintCodeList()
     var queryCode = RsdRecordset(String("SELECT des.T_NAME as name, code.T_CODE as code FROM dobjkcode_dbt des, dobjcode_dbt code WHERE code.T_OBJECTID = ", clientID, " and code.T_CODEKIND = des.T_CODEKIND AND des.T_OBJECTTYPE = 3;"));
 
     while (queryCode.moveNext())
@@ -103,12 +103,12 @@ class ClientInfo(id: Integer)
 
   macro PrintInfo()
     if (isExistClinet == false)
-      PrintLn("Нет информации по клиенту с кодом: ", clientID);
-      PrintLn("Такого клиента не существует, либо вы указали неверный код");
+      PrintLn("я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜рмации я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜: ", clientID);
+      PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜, я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜ укая┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜");
       return;
     end;
 
-    PrintLn("Информация по клиенту с кодом: ", clientID);
+    PrintLn("я┐╜я┐╜я┐╜рмая┐╜я┐╜ я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜: ", clientID);
 
     PrintNames();
     PrintCodeList();
@@ -120,7 +120,7 @@ class ClientInfo(id: Integer)
   GetRSDParty();
 end;
 
-class ClientInfoAccount()
+private class ClientInfoAccount()
   var ID, AccountID, Chapter, AccountStatus, Money, MoneyLimit, CurrencyName, CurrencyShortName, CurrencyExternalCode: Integer;
 
   private macro UpdateCurrencyByCode(code: Integer)
@@ -143,7 +143,7 @@ class ClientInfoAccount()
     MoneyLimit = accountFreeRestLimit;
   end;
 
-  macro UpdateInfo(updateQuery)
+  private macro UpdateInfo(updateQuery)
     ID = updateQuery.value("t_Account");
     AccountStatus = updateQuery.value("status");
     Chapter = updateQuery.value("t_chapter");
@@ -155,19 +155,19 @@ class ClientInfoAccount()
 
   macro PrintLineTable(updateQuery, isNeedPrintHeader)
     if (isNeedPrintHeader)
-      var headTable = "┌────────────────────────┬────────────────────────┬────────────┬───────────────────────────────┐\n" +
-                      "│                        │      Валюта счета      │            │        Текущий остаток        │\n" +
-                      "│      Номер счёта       ├───────┬────────────────┤   Статус   ├───────────────┬───────────────┤\n" +
-                      "│                        │  Код  │  Наименование  │            │   С лимитом   │  Без лимита   │";
+      var headTable = "я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜─┐\n" +
+                      "я┐╜                        я┐╜      я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜      я┐╜            я┐╜        я┐╜я┐╜я┐╜я┐╜щий я┐╜я┐╜я┐╜ток        я┐╜\n" +
+                      "я┐╜      я┐╜я┐╜я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜       я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜─┤   я┐╜я┐╜я┐╜я┐╜я┐╜   я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜─┤\n" +
+                      "я┐╜                        я┐╜  я┐╜я┐╜я┐╜  я┐╜  я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜  я┐╜            я┐╜   я┐╜ я┐╜я┐╜я┐╜я┐╜том   я┐╜  я┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜   я┐╜";
 
-      PrintLn("\nСчета клиента:");
+      PrintLn("\nя┐╜я┐╜я┐╜ я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜:");
       PrintLn(headTable);
     end;
 
     UpdateInfo(updateQuery);
 
-    PrintLn("├────────────────────────┼───────┼────────────────┼────────────┼───────────────┼───────────────┤");
-    [│  ####################  │  #### │  ############  │   #######  │ ###########   │ ###########   │]
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜─┤");
+    [я┐╜  ####################  я┐╜  #### я┐╜  ############  я┐╜   #######  я┐╜ ###########   я┐╜ ###########   я┐╜]
     (ID, CurrencyShortName, CurrencyName, AccountStatus, MoneyLimit, Money);
   end;
 end;
@@ -178,7 +178,7 @@ end;
 
 private macro PrintAccountClientInfo(clientID)
   /*                                              0                1                                                                          2          3            4 */
-  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'Открыт' else 'Закрыт' end as status, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
+  var query = RsdRecordset(String("select t_Account, t_code_currency, CASE when t_open_close = chr(0) THEN 'я┐╜я┐╜я┐╜я┐╜я┐╜' else 'я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜' end as status, t_chapter, t_accountid from daccount_dbt where t_Client = ", clientID));
 
   if (query.moveNext())
     var accCount = 1;
@@ -191,8 +191,8 @@ private macro PrintAccountClientInfo(clientID)
       accCount = accCount + 1;
     end;
 
-    PrintLn("└────────────────────────┴───────┴────────────────┴────────────┴───────────────┴───────────────┘");
-    PrintLn("Количество счетов: ", accCount);
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜");
+    PrintLn("я┐╜я┐╜я┐╜я┐╜я┐╜я┐╜тво я┐╜я┐╜тов: ", accCount);
   end;
 end;
 
