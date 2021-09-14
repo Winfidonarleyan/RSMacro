@@ -1,0 +1,278 @@
+import rsd, globals;
+
+// -- Not work in class :/
+private var arID = TArray;
+private var arFName = TArray;
+private var arSName = TArray;
+private var arLName = TArray;
+private var arPayments = TArray;
+
+// Name alg
+private var UnknownPayment = "<¥ § ¤ ­®>";
+private var TypeAlg = 2730;
+
+private macro GetStudentFIO(studentID)
+  return arFName[studentID] + " " + arSName[studentID] + " " + arLName[studentID] + " (" + studentID + ")";
+end;
+
+private macro PrintPaymentsDiff(studPaymAmount, studTaxAmount)
+  var diff = studTaxAmount - studPaymAmount;
+
+  PrintLn(">  áç¥â­ ï áã¬¬  ­ «®£®¢ëå ®âç¨á«¥­¨©: ", studPaymAmount, " àã¡.");
+  PrintLn("> ‘ã¬¬  ­ «®£®¢ëå ®âç¨á«¥­¨©: ", studTaxAmount, " àã¡.");
+
+  if (diff != 0)
+    PrintLn(">  áå®¦¤¥­¨¥ ¯® ­ «®£®¢ë¬ ®âç¨á«¥­¨ï¬ á®áâ ¢«ï¥â: ", diff, " àã¡.");
+  else
+    PrintLn(">  áå®¦¤¥­¨© ¯® ­ «®£®¢ë¬ ®âç¨á«¥­¨ï¬ ­¥â.");
+  end;
+
+  PrintLn();
+end;
+
+class Students()
+  private macro Init()
+    var query = RsdRecordset(String("select T_STUDENTID, T_FIRSTNAME, T_SECONDNAME, T_LASTNAME from dstudent_dbt"));
+
+    var count = 0;
+
+    while (query.moveNext())
+      // PrintLn("> ", query.value("T_STUDENTID"), " ", query.value("T_FIRSTNAME"), " ", query.value("T_SECONDNAME"), " ", query.value("T_LASTNAME"));
+      var studentID = query.value("T_STUDENTID");
+
+      arID(count) = studentID;
+      arFName(studentID) = query.value("T_FIRSTNAME");
+      arSName(studentID) = query.value("T_SECONDNAME");
+      arLName(studentID) = query.value("T_LASTNAME");
+
+      count = count + 1;
+    end;
+  end;
+
+  private macro PrintLinePayment(rs, isNeedPrintHeader)
+    if (isNeedPrintHeader)
+      var headTable = "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\n" +
+                      "³           „ â            ³      ’¨¯ ¢ë¯« âë      ³     ‘ã¬¬      ³";
+
+      PrintLn(headTable);
+    end;
+
+    PrintLn("ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´");
+
+    var payName = rs.value("payName");
+
+    if (payName == "")
+      payName = UnknownPayment;
+    end;
+
+    [³ ######################## ³ ##################### ³ ############# ³]
+    (rs.value("t_date"):l, payName:l, rs.value("amount"));
+  end;
+
+  private macro PrintPayments(studentID)
+    var cmd, rs;
+
+    cmd = RsdCommand("select studpaym.T_DATE as t_date, namealg.t_SZNAMEALG as payName, studpaym.T_AMOUNT as amount " +
+                     "from dstudpaym_dbt studpaym, dnamealg_dbt namealg " +
+                     "where namealg.t_ITYPEALG(+) = :nameAlgID AND namealg.t_INUMBERALG(+) = studpaym.t_PAY_TYPE AND studpaym.T_STUDENT_ID = :studentID");
+
+    cmd.addParam("nameAlgID", RSDBP_IN, TypeAlg);
+    cmd.addParam("studentID", RSDBP_IN, studentID);
+
+    cmd.execute();
+
+    rs = RsdRecordset(cmd);
+
+    if (rs.moveNext())
+      PrintLinePayment(rs, true);
+
+      while (rs.moveNext())
+        PrintLinePayment(rs);
+      end;
+
+      PrintLn("ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\n");
+    end;
+  end;
+
+  macro PrintTaxes(studentID)
+    var cmd, rs;
+
+    cmd = RsdCommand("select SUM(studpaym.t_amount) * 0.3 as paymsum " +
+                     "from dstudpaym_dbt studpaym WHERE studpaym.t_student_id = :studentID group by studpaym.t_student_id " +
+                     "union ALL " +
+                     "select stdtax.T_SUMMA from dstudtaxes_dbt stdtax WHERE stdtax.T_STUDENTID = :studentID");
+
+    cmd.addParam("studentIDD", RSDBP_IN, studentID);
+    cmd.execute();
+
+    rs = RsdRecordset(cmd);
+
+    var studPaymAmount = $0;
+    var studTaxAmount = $0;
+    var diff = $0;
+
+    if (rs.moveNext())
+      studPaymAmount = rs.value("paymsum");
+
+      if (rs.moveNext())
+        studTaxAmount = rs.value("paymsum");
+      end;
+    end;
+
+    PrintPaymentsDiff(studPaymAmount, studTaxAmount);
+  end;
+
+  private macro PrintAllInfo(number, studentID)
+    PrintLn(number, ". ", GetStudentFIO(studentID), "\n");
+    PrintPayments(studentID);
+    PrintTaxes(studentID);
+  end;
+
+  macro PrintAll()
+    [ ################################################################# ]("‚ë¯« âë áâã¤¥­â ¬":c);
+    PrintLn();
+
+    var count = 1;
+
+    for (var studentID, arID)
+      PrintAllInfo(count, studentID);
+      count = count + 1;
+    end;
+  end;
+
+  Init(); // -- Init list
+end;
+
+class StudentsTB()
+  macro Init()
+    var student = TBfile("student.dbt");
+
+    student.KeyNum = 1;
+
+    ClearRecord(student);
+
+    student.rec.StudentID = 0;
+
+    var stat = student.GetGE;
+    var count = 0;
+
+    while (stat)
+      var studentID = student.rec.StudentID;
+
+      arID(count) = studentID;
+      arFName(studentID) = student.rec.FirstName;
+      arSName(studentID) = student.rec.SecondName;
+      arLName(studentID) = student.rec.LastName;
+
+      stat = student.Next();
+      count = count + 1;
+    end;
+  end;
+
+  private macro PrintLinePayment(_date, paymName, amount : Money)
+    PrintLn("ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´");
+
+    [³ ######################## ³ ##################### ³ ############# ³]
+    (_date:l, paymName:l, amount);
+  end;
+
+  private macro GetPaymentName(paymentID) : String
+    var namealg = TBfile("namealg.dbt"); // dnamealg_dbt
+
+    ClearRecord(namealg);
+
+    namealg.rec.ITYPEALG = TypeAlg;
+    namealg.rec.INumberAlg = paymentID;
+
+    if (namealg.GetEQ)
+      return namealg.rec.szNameAlg;
+    else
+      return UnknownPayment;
+    end;
+  end;
+
+  private macro PrintPayments(studentID)
+    var studpaym = TBfile("studpaym.dbt"); // dstudpaym_dbt
+
+    studpaym.KeyNum = 1;
+
+    ClearRecord(studpaym);
+
+    studpaym.rec.ID = 0;
+    studpaym.rec.Student_ID = studentID;
+
+    var stat = studpaym.GetGE;
+    studpaym.AddFilter("t_Student_ID = " + studentID);
+    var count = 0;
+
+    var headTable = "ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\n" +
+                    "³           „ â            ³      ’¨¯ ¢ë¯« âë      ³     ‘ã¬¬      ³";
+
+    if (stat)
+      stat = studpaym.Next(); // Very interesting behavior
+    end;
+
+    if (stat)
+      PrintLn(headTable);
+      arPayments(studentID) = $0;
+
+      while (stat)
+        PrintLinePayment(studpaym.rec.Date, GetPaymentName(studpaym.rec.Pay_Type), studpaym.rec.Amount);
+        arPayments(studentID) = arPayments(studentID) + studpaym.rec.Amount;
+        stat = studpaym.Next();
+      end;
+
+      PrintLn("ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\n");
+    end;
+  end;
+
+  private macro PrintTaxes(studentID)
+    var studtaxes = TBfile("studtaxes.dbt"); // dstudtaxes_dbt
+
+    if (arPayments(studentID) == null)
+      arPayments(studentID) = $0;
+    end;
+
+    var studPaymAmount = arPayments(studentID) * 0.3;
+    var studTaxAmount = $0;
+
+    ClearRecord(studtaxes);
+
+    studtaxes.rec.StudentID = studentID;
+
+    if (studtaxes.GetEQ())
+      studTaxAmount = studtaxes.rec.Summa;
+    end;
+
+    PrintPaymentsDiff(studPaymAmount, studTaxAmount);
+  end;
+
+  private macro PrintAllInfo(number, studentID)
+    PrintLn(number, ". ", GetStudentFIO(studentID), "\n");
+    PrintPayments(studentID);
+    PrintTaxes(studentID);
+  end;
+
+  macro PrintAll()
+    [ ################################################################# ]("‚ë¯« âë áâã¤¥­â ¬":c);
+    PrintLn();
+
+    var count = 1;
+
+    for (var studentID, arID)
+      PrintAllInfo(count, studentID);
+      count = count + 1;
+    end;
+  end;
+
+  Init(); // -- Init list
+end;
+
+private macro PrintAllPayments()
+  Students.PrintAll();
+  PrintLn("-----------------------------------------------------------");
+  StudentsTB.PrintAll();
+end;
+
+/* Init */
+PrintAllPayments();
