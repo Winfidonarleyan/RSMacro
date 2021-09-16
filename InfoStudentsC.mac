@@ -1,0 +1,131 @@
+import rsd, globals, WldInter;
+
+// -- Not work in class :/
+private var arPayments;
+private var arPaymentAmount = $0;
+
+// Name alg
+private var UnknownPayment = "<ç• ß†§†≠Æ>";
+private var TypeAlg = 2730;
+
+// Record
+RECORD student(student);
+
+private macro GetStudentFIO()
+  return student.FirstName + " " + student.SecondName + " " + student.LastName + " (" + student.StudentID + ")";
+end;
+
+private macro PrintPaymentsDiff(studPaymAmount, studTaxAmount)
+  var diff = studTaxAmount - studPaymAmount;
+  arPaymentAmount = studPaymAmount;
+
+  PrintLn("> ê†·Á•‚≠†Ô ·„¨¨† ≠†´Æ£Æ¢ÎÂ Æ‚Á®·´•≠®©: ", studTaxAmount, " ‡„°.");
+  PrintLn("> ë„¨¨† ≠†´Æ£Æ¢ÎÂ Æ‚Á®·´•≠®©: ", studPaymAmount, " ‡„°.");
+
+  if (diff != 0)
+    PrintLn("> ê†·ÂÆ¶§•≠®• ØÆ ≠†´Æ£Æ¢Î¨ Æ‚Á®·´•≠®Ô¨ ·Æ·‚†¢´Ô•‚: ", diff, " ‡„°.");
+  else
+    PrintLn("> ê†·ÂÆ¶§•≠®© ØÆ ≠†´Æ£Æ¢Î¨ Æ‚Á®·´•≠®Ô¨ ≠•‚.");
+  end;
+
+  PrintLn();
+end;
+
+private macro PrintLinePayment(_date, paymName, amount : Money)
+  PrintLn("√ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ≈ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ≈ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¥");
+
+  [≥ ######################## ≥ ##################### ≥ ############# ≥]
+  (_date:l, paymName:l, amount);
+end;
+
+private macro GetPaymentName(paymentID) : String
+  var namealg = TBfile("namealg.dbt"); // dnamealg_dbt
+
+  ClearRecord(namealg);
+
+  namealg.rec.ITYPEALG = TypeAlg;
+  namealg.rec.INumberAlg = paymentID;
+
+  if (namealg.GetEQ)
+    return namealg.rec.szNameAlg;
+  else
+    return UnknownPayment;
+  end;
+end;
+
+private macro PrintPayments()
+  var studpaym = TBfile("studpaym.dbt"); // dstudpaym_dbt
+
+  studpaym.KeyNum = 1;
+
+  ClearRecord(studpaym);
+
+  studpaym.rec.ID = 0;
+  studpaym.rec.Student_ID = student.StudentID;
+
+  var stat = studpaym.GetGE;
+  studpaym.AddFilter("t_Student_ID = " + student.StudentID);
+  var count = 0;
+
+  var headTable = "⁄ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¬ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¬ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒø\n" +
+                  "≥           Ñ†‚†           ≥      í®Ø ¢ÎØ´†‚Î      ≥     ë„¨¨†     ≥";
+
+  if (stat)
+    stat = studpaym.Next(); // Very interesting behavior
+  end;
+
+  if (stat)
+    PrintLn(headTable);
+    arPayments = $0;
+
+    while (stat)
+      PrintLinePayment(studpaym.rec.Date, GetPaymentName(studpaym.rec.Pay_Type), studpaym.rec.Amount);
+      arPayments = arPayments + studpaym.rec.Amount;
+      stat = studpaym.Next();
+    end;
+
+    PrintLn("¿ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ¡ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒŸ\n");
+  end;
+end;
+
+private macro PrintTaxes()
+  var studtaxes = TBfile("studtaxes.dbt"); // dstudtaxes_dbt
+
+  if (arPayments == null)
+    arPayments = $0;
+  end;
+
+  var studPaymAmount = arPayments * 0.3;
+  var studTaxAmount = $0;
+
+  ClearRecord(studtaxes);
+
+  studtaxes.rec.StudentID = student.StudentID;
+
+  if (studtaxes.GetEQ())
+    studTaxAmount = studtaxes.rec.Summa;
+  end;
+
+  PrintPaymentsDiff(studPaymAmount, studTaxAmount);
+end;
+
+macro PrintInfo()
+  [ ########################## ############################################################]("ÇÎØ´†‚Î ·‚„§•≠‚„:":r, GetStudentFIO());
+  PrintLn();
+  PrintPayments();
+  PrintTaxes();
+end;
+
+macro GetSign() : String
+  return student.LastName + arPaymentAmount;
+end;
+
+macro GetDigitalSignEncode()
+  return DigitalSignEncode(GetSign());
+end;
+
+macro PrintStudentInfo(addrStudent)
+  SetBuff(student, addrStudent);
+  PrintInfo();
+  PrintLn("> ñ®‰‡Æ¢†Ô ØÆ§Ø®·Ï: ", GetDigitalSignEncode());
+end;
